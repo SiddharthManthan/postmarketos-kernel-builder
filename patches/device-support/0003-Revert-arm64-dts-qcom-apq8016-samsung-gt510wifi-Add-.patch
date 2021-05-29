@@ -1,0 +1,135 @@
+From 78a9bab49876ac6ac7298eb624a94390a2c59c29 Mon Sep 17 00:00:00 2001
+From: Nikita Travkin <nikitos.tr@gmail.com>
+Date: Wed, 5 May 2021 14:21:22 +0500
+Subject: [PATCH 03/24] Revert "arm64: dts: qcom: apq8016-samsung-gt510wifi:
+ Add display panel (v3)"
+
+This reverts commit 2a3b1974d2d602eb0019ad4f8437cdbd121f5a13.
+---
+ .../dts/qcom/apq8016-samsung-gt510wifi.dts    | 89 -------------------
+ 1 file changed, 89 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts b/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts
+index a115113e87..7e9cbeaed1 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts
++++ b/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts
+@@ -66,32 +66,6 @@ hall-sensor {
+ 		};
+ 	};
+ 
+-	reg_lcd_vmipi: regulator-lcd-vmipi {
+-		compatible = "regulator-fixed";
+-		regulator-name = "lcd_vmipi";
+-		regulator-min-microvolt = <1800000>;
+-		regulator-max-microvolt = <1800000>;
+-
+-		gpio = <&msmgpio 8 GPIO_ACTIVE_HIGH>;
+-		enable-active-high;
+-
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&lcd_en_default>;
+-	};
+-
+-	reg_vlcd_5p4v: regulator-vlcd-5p4v {
+-		compatible = "regulator-fixed";
+-		regulator-name = "vlcd_5p4v";
+-		regulator-min-microvolt = <5400000>;
+-		regulator-max-microvolt = <5400000>;
+-
+-		gpio = <&msmgpio 51 GPIO_ACTIVE_HIGH>;
+-		enable-active-high;
+-
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&buckbooster_en_default>;
+-	};
+-
+ 	reg_tsp_1p8v: regulator-tsp-1p8v {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "tsp_1p8v";
+@@ -145,36 +119,6 @@ &blsp1_uart2 {
+ 	status = "okay";
+ };
+ 
+-&dsi0 {
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&mdss_default>;
+-	pinctrl-1 = <&mdss_sleep>;
+-
+-	panel@0 {
+-		compatible = "samsung,s6d7aa0-ltl101at01";
+-		reg = <0>;
+-
+-		vmipi-supply = <&reg_lcd_vmipi>;
+-		5p4v-supply = <&reg_vlcd_5p4v>;
+-		reset-gpios = <&msmgpio 97 GPIO_ACTIVE_LOW>;
+-
+-		port {
+-			panel_in: endpoint {
+-				remote-endpoint = <&dsi0_out>;
+-			};
+-		};
+-	};
+-};
+-
+-&dsi0_out {
+-	data-lanes = <0 1 2 3>;
+-	remote-endpoint = <&panel_in>;
+-};
+-
+-&mdss {
+-	status = "okay";
+-};
+-
+ &pm8916_resin {
+ 	status = "okay";
+ 	linux,code = <KEY_VOLUMEDOWN>;
+@@ -320,14 +264,6 @@ l18 {
+ };
+ 
+ &msmgpio {
+-	buckbooster_en_default: buckbooster-en-default {
+-		pins = "gpio51";
+-		function = "gpio";
+-
+-		drive-strength = <2>;
+-		bias-disable;
+-	};
+-
+ 	gpio_keys_default: gpio-keys-default {
+ 		pins = "gpio107", "gpio109";
+ 		function = "gpio";
+@@ -344,31 +280,6 @@ gpio_hall_sensor_default: gpio-hall-sensor-default {
+ 		bias-disable;
+ 	};
+ 
+-	lcd_en_default: lcd-en-default {
+-		pins = "gpio8";
+-		function = "gpio";
+-
+-		drive-strength = <2>;
+-		bias-disable;
+-	};
+-
+-	mdss {
+-		mdss_default: mdss-default {
+-			pins = "gpio97";
+-			function = "gpio";
+-
+-			drive-strength = <8>;
+-			bias-disable;
+-		};
+-		mdss_sleep: mdss-sleep {
+-			pins = "gpio97";
+-			function = "gpio";
+-
+-			drive-strength = <2>;
+-			bias-pull-down;
+-		};
+-	};
+-
+ 	tsp_en_default: tsp-en-default {
+ 		pins = "gpio73";
+ 		function = "gpio";
+-- 
+2.25.1
+

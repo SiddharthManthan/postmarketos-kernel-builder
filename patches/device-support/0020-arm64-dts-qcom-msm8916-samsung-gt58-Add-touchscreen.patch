@@ -1,0 +1,95 @@
+From 787987b9a5e531890538babae26910f9536da8b1 Mon Sep 17 00:00:00 2001
+From: Siddharth Manthan <siddharth_manthan@outlook.com>
+Date: Thu, 13 May 2021 19:48:21 +0530
+Subject: [PATCH 20/24] arm64: dts: qcom: msm8916-samsung-gt58: Add touchscreen
+
+gt58 uses Zinitix bt532 touch controller.
+Add it to device tree using Zinitix bt541 drivers.
+
+Signed-off-by: Siddharth Manthan <siddharth_manthan@outlook.com>
+---
+ .../boot/dts/qcom/msm8916-samsung-gt58.dts    | 54 +++++++++++++++++++
+ 1 file changed, 54 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts
+index 324a2d9c12..7b71da9e3e 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts
++++ b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts
+@@ -21,6 +21,19 @@ reg_5p4v: regulator-5p4v {
+ 		pinctrl-0 = <&buckbooster_en_default>;
+ 	};
+ 
++	reg_vdd_tsp: regulator-vdd-tsp {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd_tsp";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++
++		gpio = <&msmgpio 73 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&reg_tsp_en_default>;
++	};
++
+ 	vibrator {
+ 		compatible = "gpio-vibrator";
+ 		enable-gpios = <&msmgpio 76 GPIO_ACTIVE_HIGH>;
+@@ -30,6 +43,31 @@ vibrator {
+ 	};
+ };
+ 
++&blsp_i2c5 {
++	status = "okay";
++
++	/*
++	 * Actual IC is Zinitix bt532.
++	 * It seems compatible enough with bt541 for basic functionality.
++	 */
++
++	touchscreen@20 {
++		compatible = "zinitix,bt532", "zinitix,bt541";
++		reg = <0x20>;
++		interrupt-parent = <&msmgpio>;
++		interrupts = <13 IRQ_TYPE_EDGE_FALLING>;
++
++		touchscreen-size-x = <768>;
++		touchscreen-size-y = <1024>;
++
++		vdd-supply = <&reg_vdd_tsp>;
++		vddo-supply = <&pm8916_l6>;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&tsp_int_default>;
++	};
++};
++
+ &dsi0 {
+ 	pinctrl-names = "default", "sleep";
+ 	pinctrl-0 = <&mdss_default>;
+@@ -87,6 +125,22 @@ mdss_sleep: mdss-sleep {
+ 		};
+ 	};
+ 
++	reg_tsp_en_default: reg-tsp-en-default {
++		pins = "gpio73";
++		function = "gpio";
++
++		drive-strength = <2>;
++		bias-disable;
++	};
++
++	tsp_int_default: tsp-int-default {
++		pins = "gpio13";
++		function = "gpio";
++
++		drive-strength = <2>;
++		bias-disable;
++	};
++
+ 	vibrator_en_default: vibrator-en-default {
+ 		pins = "gpio76";
+ 		function = "gpio";
+-- 
+2.25.1
+

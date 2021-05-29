@@ -1,0 +1,25 @@
+From 717234d0c527f206ce43ff1d327a27d21eec7d22 Mon Sep 17 00:00:00 2001
+From: Siddharth Manthan <siddharth_manthan@outlook.com>
+Date: Sat, 29 May 2021 22:06:41 +0530
+Subject: [PATCH] Fix qcom-msm8916-no-psci.dtsi path
+
+---
+ arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi
+index 8a69bde63e..acd31d9ef7 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi
+@@ -3,7 +3,7 @@
+ /dts-v1/;
+ 
+ #include "msm8916-pm8916.dtsi"
+-#include "msm8916-no-psci.dtsi"
++#include "arm/qcom-msm8916-no-psci.dtsi"
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/input/input.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
+-- 
+2.25.1
+

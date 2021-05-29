@@ -1,0 +1,26 @@
+From a20c504553187ecf4f86f77c42e403b5f77be226 Mon Sep 17 00:00:00 2001
+From: Nikita Travkin <nikitos.tr@gmail.com>
+Date: Wed, 5 May 2021 14:22:31 +0500
+Subject: [PATCH] Revert "arm64: dts: qcom: Add device tree for Samsung Galaxy
+ Tab A 9.7 WiFi (2015) (v4)"
+
+This reverts commit 3350b7c8525bef6202c9ba2ee75077f9434501d1.
+This patch was modified. It also deletes arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts.
+---
+ arch/arm64/boot/dts/qcom/Makefile             |   1 -
+ .../dts/qcom/apq8016-samsung-gt510wifi.dts    | 240 ------------------
+ 1 files changed, 1 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
+index e4b45c0187..d147837cd6 100644
+--- a/arch/arm64/boot/dts/qcom/Makefile
++++ b/arch/arm64/boot/dts/qcom/Makefile
+@@ -1,5 +1,4 @@
+ # SPDX-License-Identifier: GPL-2.0
+-dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-samsung-gt510wifi.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-samsung-matissevewifi.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= apq8094-sony-xperia-kitakami-karin_windy.dtb
+-- 
+2.25.1
+

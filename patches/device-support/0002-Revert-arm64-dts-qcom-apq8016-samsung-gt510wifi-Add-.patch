@@ -1,0 +1,106 @@
+From 3faba1e257131a84d3ea1c0a27950bd7e7ad4a21 Mon Sep 17 00:00:00 2001
+From: Nikita Travkin <nikitos.tr@gmail.com>
+Date: Wed, 5 May 2021 14:21:20 +0500
+Subject: [PATCH 02/24] Revert "arm64: dts: qcom: apq8016-samsung-gt510wifi:
+ Add sound card (v4)"
+
+This reverts commit 8067e74fe83a29468da46ff8c780be2816b6339b.
+---
+ .../dts/qcom/apq8016-samsung-gt510wifi.dts    | 60 -------------------
+ 1 file changed, 60 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts b/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts
+index 9f8fac8af5..a115113e87 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts
++++ b/arch/arm64/boot/dts/qcom/apq8016-samsung-gt510wifi.dts
+@@ -7,7 +7,6 @@
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/input/input.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
+-#include <dt-bindings/sound/apq8016-lpass.h>
+ 
+ / {
+ 	model = "Samsung Galaxy Tab A 9.7 WiFi (2015) (SM-T550)";
+@@ -29,12 +28,6 @@ tz-apps@85500000 {
+ 		};
+ 	};
+ 
+-	speaker_codec: audio-codec {
+-		compatible = "maxim,max98357a";
+-		sdmode-gpios = <&msmgpio 55 GPIO_ACTIVE_HIGH>;
+-		#sound-dai-cells = <0>;
+-	};
+-
+ 	gpio-keys {
+ 		compatible = "gpio-keys";
+ 
+@@ -178,15 +171,6 @@ &dsi0_out {
+ 	remote-endpoint = <&panel_in>;
+ };
+ 
+-&lpass {
+-	status = "okay";
+-
+-	dai@3 {
+-		reg = <MI2S_QUATERNARY>;
+-		qcom,playback-sd-lines = <1>;
+-	};
+-};
+-
+ &mdss {
+ 	status = "okay";
+ };
+@@ -222,50 +206,6 @@ &sdhc_2 {
+ 	cd-gpios = <&msmgpio 38 GPIO_ACTIVE_LOW>;
+ };
+ 
+-&sound {
+-	status = "okay";
+-
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&cdc_pdm_lines_act &ext_sec_tlmm_lines_act>;
+-	pinctrl-1 = <&cdc_pdm_lines_sus &ext_sec_tlmm_lines_sus>;
+-
+-	model = "samsung-gt510";
+-	audio-routing =
+-		"AMIC1", "MIC BIAS External1",
+-		"AMIC2", "MIC BIAS Internal2",
+-		"AMIC3", "MIC BIAS External1";
+-
+-	dai-link-primary {
+-		link-name = "Primary MI2S";
+-		cpu {
+-			sound-dai = <&lpass MI2S_PRIMARY>;
+-		};
+-		codec {
+-			sound-dai = <&lpass_codec 0>, <&wcd_codec 0>;
+-		};
+-	};
+-
+-	dai-link-tertiary {
+-		link-name = "Tertiary MI2S";
+-		cpu {
+-			sound-dai = <&lpass MI2S_TERTIARY>;
+-		};
+-		codec {
+-			sound-dai = <&lpass_codec 1>, <&wcd_codec 1>;
+-		};
+-	};
+-
+-	dai-link-quaternary {
+-		link-name = "Quaternary MI2S";
+-		cpu {
+-			sound-dai = <&lpass MI2S_QUATERNARY>;
+-		};
+-		codec {
+-			sound-dai = <&speaker_codec>;
+-		};
+-	};
+-};
+-
+ &usb {
+ 	status = "okay";
+ 	dr_mode = "peripheral";
+-- 
+2.25.1
+

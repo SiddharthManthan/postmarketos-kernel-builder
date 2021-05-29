@@ -1,0 +1,60 @@
+From eeaa81ee7afbdeaee33ef22174b300f0a0be1d80 Mon Sep 17 00:00:00 2001
+From: Siddharth Manthan <siddharth_manthan@outlook.com>
+Date: Mon, 10 May 2021 14:59:50 +0530
+Subject: [PATCH 17/24] arm64: dts: qcom: Add device tree for Samsung Galaxy
+ Tab A 8.0 (2015)
+
+This dts adds support for wifi and lte variants of
+Samsung Galaxy Tab A 8.0 (2015), a tablet released in 2015.
+
+Add a device tree for gt58 with initial support for:
+
+- SDHCI (internal and external storage)
+- USB Device Mode
+- UART (untested)
+- Regulators
+- WCNSS (WiFi/BT)
+- GPIO keys
+
+Most of the device tree is separated into
+msm8916-samsung-gt5-common.dtsi as there is also gt510 device
+(Samsung Galaxy Tab A 9.7) that share a lot of hardware with gt58.
+
+Signed-off-by: Siddharth Manthan <siddharth_manthan@outlook.com>
+---
+ arch/arm64/boot/dts/qcom/Makefile                 |  1 +
+ arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts | 10 ++++++++++
+ 2 files changed, 11 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts
+
+diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
+index 65f47aadc9..6b56e370f9 100644
+--- a/arch/arm64/boot/dts/qcom/Makefile
++++ b/arch/arm64/boot/dts/qcom/Makefile
+@@ -23,6 +23,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-a3u-eur.dtb msm8916-samsung-a3u-eur-m
+ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-a5u-eur.dtb msm8916-samsung-a5u-eur-modem.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-gprimeltecan.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-gt510.dtb msm8916-samsung-gt510lte-modem.dtb
++dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-gt58.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j3ltespr.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-samsung-j5nlte.dtb
+ dtb-$(CONFIG_ARCH_QCOM)	+= msm8916-wingtech-wt86518.dtb msm8916-wingtech-wt86518-modem.dtb
+diff --git a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts
+new file mode 100644
+index 0000000000..384b396b00
+--- /dev/null
++++ b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt58.dts
+@@ -0,0 +1,10 @@
++// SPDX-License-Identifier: GPL-2.0-only
++
++/dts-v1/;
++
++#include "msm8916-samsung-gt5-common.dtsi"
++
++/ {
++	model = "Samsung Galaxy Tab A 8.0 (2015)";
++	compatible = "samsung,gt58", "qcom,msm8916";
++};
+-- 
+2.25.1
+

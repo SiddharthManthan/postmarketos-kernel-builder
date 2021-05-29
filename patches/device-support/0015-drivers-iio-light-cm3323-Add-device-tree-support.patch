@@ -1,0 +1,34 @@
+From 599e762961d5e0b40c9baed92dd0594530a30921 Mon Sep 17 00:00:00 2001
+From: Siddharth Manthan <siddharth_manthan@outlook.com>
+Date: Sat, 8 May 2021 19:45:48 +0530
+Subject: [PATCH 15/24] drivers: iio: light: cm3323: Add device tree support
+
+Signed-off-by: Siddharth Manthan <siddharth_manthan@outlook.com>
+---
+ drivers/iio/light/cm3323.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/iio/light/cm3323.c b/drivers/iio/light/cm3323.c
+index 6d1b0ffd14..fd9a8c27de 100644
+--- a/drivers/iio/light/cm3323.c
++++ b/drivers/iio/light/cm3323.c
+@@ -256,9 +256,16 @@ static const struct i2c_device_id cm3323_id[] = {
+ };
+ MODULE_DEVICE_TABLE(i2c, cm3323_id);
+ 
++static const struct of_device_id cm3323_of_match[] = {
++	{ .compatible = "capella,cm3323", },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, cm3323_of_match);
++
+ static struct i2c_driver cm3323_driver = {
+ 	.driver = {
+ 		.name = CM3323_DRV_NAME,
++		.of_match_table = cm3323_of_match,
+ 	},
+ 	.probe		= cm3323_probe,
+ 	.id_table	= cm3323_id,
+-- 
+2.25.1
+
