@@ -1,54 +1,65 @@
-From ec1a1d35162929b02e3c7773493b9b086062fa40 Mon Sep 17 00:00:00 2001
-From: Siddharth Manthan <siddharth_manthan@outlook.com>
-Date: Wed, 26 May 2021 13:00:28 +0530
-Subject: [PATCH 24/24] Modify max77843 extcon driver for max77849 and add
- support in device tree
-
-After applying this patch the driver will not work for max77843. There are
-unhandled interrupts which will be disabled by linux.
-
-Host and Peripheral mode works.
----
- .../dts/qcom/msm8916-samsung-gt5-common.dtsi  | 43 ++++++++++++++++---
- arch/arm64/configs/msm8916_defconfig          |  2 +
- drivers/extcon/extcon-max77843.c              | 15 ++++---
- drivers/mfd/max77843.c                        | 21 ++++++++-
- include/linux/mfd/max77843-private.h          | 23 +++++++---
- 5 files changed, 83 insertions(+), 21 deletions(-)
-
 diff --git a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi
-index beb3920a83..8a69bde63e 100644
+index 80e92f8db3d6..1f0e5b866de3 100644
 --- a/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi
 +++ b/arch/arm64/boot/dts/qcom/msm8916-samsung-gt5-common.dtsi
-@@ -117,10 +117,23 @@ fuelgauge@36 {
+@@ -88,12 +88,6 @@ hall-sensor {
+ 			linux,can-disable;
  		};
  	};
- 
+-
 -	// FIXME: Use extcon device provided by MUIC driver when available
 -	usb_vbus: usb-vbus {
 -		compatible = "linux,extcon-usb-gpio";
 -		vbus-gpio = <&msmgpio 2 GPIO_ACTIVE_HIGH>;
-+};
-+
+-	};
+ };
+ 
+ &blsp_i2c4 {
+@@ -115,32 +109,21 @@ fuelgauge@36 {
+ 	};
+ };
+ 
+-&blsp_i2c2 {
+-	status = "okay";
+-
+-	accelerometer@1d {
+-		compatible = "st,lis2hh12";
+-		reg = <0x1d>;
+-
+-		vdd-supply = <&pm8916_l17>;
+-		vddio-supply = <&pm8916_l5>;
 +&blsp_i2c1 {
 +	status =  "okay";
-+
+ 
 +	pmic@66 {
 +		compatible = "maxim,max77843";
-+		interrupt-parent = <&msmgpio>;
+ 		interrupt-parent = <&msmgpio>;
+-		interrupts = <115 IRQ_TYPE_EDGE_RISING>;
+-		interrupt-names = "INT1";
+-
+-		st,drdy-int-pin = <1>;
+-		mount-matrix = "0", "1", "0",
+-			      "-1", "0", "0",
+-			       "0", "0", "1";
 +		interrupts = <12 IRQ_TYPE_EDGE_FALLING>;
 +		reg = <0x66>;
-+
+ 
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&accel_int_default>;
+-	};
 +		muic: max77843-muic {
 +			compatible = "maxim,max77843-muic";
-+
+ 
+-	light-sensor@10 {
+-		compatible = "capella,cm3323";
+-		reg = <0x10>;
 +			pinctrl-names = "default";
 +			pinctrl-0 = <&muic_int_default &ovp_en_default>;
 +		};
  	};
  };
  
-@@ -243,12 +256,11 @@ codec {
+@@ -234,12 +217,11 @@ codec {
  
  &usb {
  	status = "okay";
@@ -63,7 +74,22 @@ index beb3920a83..8a69bde63e 100644
  };
  
  &wcd_codec {
-@@ -412,4 +424,21 @@ jack_default: jack-default {
+@@ -356,14 +338,6 @@ l18 {
+ };
+ 
+ &msmgpio {
+-	accel_int_default: accel-int-default {
+-		pins = "gpio115";
+-		function = "gpio";
+-
+-		drive-strength = <2>;
+-		bias-disable;
+-	};
+-
+ 	fuelgauge_int_default: fuelgauge-int-default {
+ 		pins = "gpio121";
+ 		function = "gpio";
+@@ -395,4 +369,21 @@ jack_default: jack-default {
  		drive-strength = <2>;
  		bias-disable;
  	};
@@ -86,10 +112,10 @@ index beb3920a83..8a69bde63e 100644
 +	};
  };
 diff --git a/arch/arm64/configs/msm8916_defconfig b/arch/arm64/configs/msm8916_defconfig
-index 8aba03f4f2..fe7bd8d87d 100644
+index ad10f548861a..25e2af493f83 100644
 --- a/arch/arm64/configs/msm8916_defconfig
 +++ b/arch/arm64/configs/msm8916_defconfig
-@@ -201,6 +201,7 @@ CONFIG_QCOM_TSENS=y
+@@ -203,6 +203,7 @@ CONFIG_QCOM_TSENS=y
  CONFIG_QCOM_SPMI_TEMP_ALARM=y
  CONFIG_WATCHDOG=y
  CONFIG_PM8916_WATCHDOG=y
@@ -97,7 +123,7 @@ index 8aba03f4f2..fe7bd8d87d 100644
  CONFIG_MFD_SPMI_PMIC=y
  CONFIG_MFD_RT5033=m
  CONFIG_REGULATOR_FIXED_VOLTAGE=y
-@@ -308,6 +309,7 @@ CONFIG_QCOM_APR=m
+@@ -309,6 +310,7 @@ CONFIG_QCOM_APR=m
  CONFIG_QCOM_MEMSHARE_QMI_SERVICE=m
  CONFIG_PM_DEVFREQ=y
  CONFIG_DEVFREQ_GOV_SIMPLE_ONDEMAND=y
@@ -106,7 +132,7 @@ index 8aba03f4f2..fe7bd8d87d 100644
  CONFIG_EXTCON_USB_DUMMY=y
  CONFIG_EXTCON_USB_GPIO=y
 diff --git a/drivers/extcon/extcon-max77843.c b/drivers/extcon/extcon-max77843.c
-index 8e6e97ec65..6814a1967d 100644
+index 8e6e97ec65a8..237640000260 100644
 --- a/drivers/extcon/extcon-max77843.c
 +++ b/drivers/extcon/extcon-max77843.c
 @@ -139,6 +139,7 @@ struct max77843_muic_irq {
@@ -141,26 +167,28 @@ index 8e6e97ec65..6814a1967d 100644
  
  	/* INT3 interrupt */
  	{ .reg_offset = 2, .mask = MAX77843_MUIC_VBADC, },
-@@ -247,15 +251,12 @@ static void max77843_charger_set_otg_vbus(struct max77843_muic_info *info,
- 		 bool on)
- {
+@@ -249,13 +253,14 @@ static void max77843_charger_set_otg_vbus(struct max77843_muic_info *info,
  	struct max77693_dev *max77843 = info->max77843;
--	unsigned int cnfg00;
+ 	unsigned int cnfg00;
  
-+	/*Fixme : Use proper registers from downstream*/
- 	if (on)
+-	if (on)
 -		cnfg00 = MAX77843_CHG_OTG_MASK | MAX77843_CHG_BOOST_MASK;
+-	else
++	/*Fixme : Use proper registers from downstream*/
++	if (on) {
 +		regmap_write(max77843->regmap_chg,MAX77843_CHG_REG_CHG_CNFG_00,0x2a);
- 	else
--		cnfg00 = MAX77843_CHG_ENABLE | MAX77843_CHG_BUCK_MASK;
++	} else {
+ 		cnfg00 = MAX77843_CHG_ENABLE | MAX77843_CHG_BUCK_MASK;
 -
 -	regmap_update_bits(max77843->regmap_chg, MAX77843_CHG_REG_CHG_CNFG_00,
 -			   MAX77843_CHG_MODE_MASK, cnfg00);
-+		regmap_write(max77843->regmap_chg,MAX77843_CHG_REG_CHG_CNFG_00,0x00); //Disable charger too
++		regmap_update_bits(max77843->regmap_chg, MAX77843_CHG_REG_CHG_CNFG_00,
++			MAX77843_CHG_MODE_MASK, cnfg00);
++	}
  }
  
  static int max77843_muic_get_cable_type(struct max77843_muic_info *info,
-@@ -670,6 +671,7 @@ static irqreturn_t max77843_muic_irq_handler(int irq, void *data)
+@@ -670,6 +675,7 @@ static irqreturn_t max77843_muic_irq_handler(int irq, void *data)
  
  	switch (irq_type) {
  	case MAX77843_MUIC_IRQ_INT1_ADC:
@@ -168,7 +196,7 @@ index 8e6e97ec65..6814a1967d 100644
  	case MAX77843_MUIC_IRQ_INT1_ADCERROR:
  	case MAX77843_MUIC_IRQ_INT1_ADC1K:
  		info->irq_adc = true;
-@@ -679,6 +681,7 @@ static irqreturn_t max77843_muic_irq_handler(int irq, void *data)
+@@ -679,6 +685,7 @@ static irqreturn_t max77843_muic_irq_handler(int irq, void *data)
  	case MAX77843_MUIC_IRQ_INT2_DCDTMR:
  	case MAX77843_MUIC_IRQ_INT2_DXOVP:
  	case MAX77843_MUIC_IRQ_INT2_VBVOLT:
@@ -177,7 +205,7 @@ index 8e6e97ec65..6814a1967d 100644
  		break;
  	case MAX77843_MUIC_IRQ_INT3_VBADC:
 diff --git a/drivers/mfd/max77843.c b/drivers/mfd/max77843.c
-index 209ee24d9c..d462d2bc0b 100644
+index 209ee24d9ce1..3d23b2018a8c 100644
 --- a/drivers/mfd/max77843.c
 +++ b/drivers/mfd/max77843.c
 @@ -110,6 +110,13 @@ static int max77843_probe(struct i2c_client *i2c,
@@ -194,7 +222,7 @@ index 209ee24d9c..d462d2bc0b 100644
  	max77843->regmap = devm_regmap_init_i2c(i2c,
  			&max77843_regmap_config);
  	if (IS_ERR(max77843->regmap)) {
-@@ -138,8 +145,20 @@ static int max77843_probe(struct i2c_client *i2c,
+@@ -138,8 +145,17 @@ static int max77843_probe(struct i2c_client *i2c,
  		dev_err(&i2c->dev, "Failed to init Charger\n");
  		goto err_pmic_id;
  	}
@@ -207,9 +235,6 @@ index 209ee24d9c..d462d2bc0b 100644
 +	if (ret < 0) {
 +		dev_err(&i2c->dev, "Failed to disable active discharge\n");
 +	}
-+
-+	/* Disable charger */
-+	regmap_write(max77843->regmap_chg,MAX77843_CHG_REG_CHG_CNFG_00,0x00);
  
 -	ret = regmap_update_bits(max77843->regmap,
 +	ret = regmap_update_bits(max77843->regmap_chg,
@@ -217,7 +242,7 @@ index 209ee24d9c..d462d2bc0b 100644
  				 MAX77843_INTSRC_MASK_MASK,
  				 (unsigned int)~MAX77843_INTSRC_MASK_MASK);
 diff --git a/include/linux/mfd/max77843-private.h b/include/linux/mfd/max77843-private.h
-index 0bc7454c4d..10d294e7ae 100644
+index 0bc7454c4dbe..10d294e7aecb 100644
 --- a/include/linux/mfd/max77843-private.h
 +++ b/include/linux/mfd/max77843-private.h
 @@ -13,9 +13,9 @@
@@ -318,6 +343,3 @@ index 0bc7454c4d..10d294e7ae 100644
  #define MAX77843_MUIC_STATUS1_ADCERROR_MASK	BIT(MAX77843_MUIC_STATUS1_ADCERROR_SHIFT)
  #define MAX77843_MUIC_STATUS1_ADC1K_MASK	BIT(MAX77843_MUIC_STATUS1_ADC1K_SHIFT)
  #define MAX77843_MUIC_STATUS2_CHGTYP_MASK	(0x7 << MAX77843_MUIC_STATUS2_CHGTYP_SHIFT)
--- 
-2.25.1
-
